@@ -1,0 +1,35 @@
+[project]
+name = "ANL488-FYP"
+version = "0.1.0"
+description = "ML project for Factory price prediction"
+requires-python = ">=3.12"
+dependencies = []
+
+[project.optional-dependencies]
+backend = [
+    "pandas==3.0.1",
+    "numpy==2.4.3",
+    "scikit-learn==1.8.0",
+    "joblib==1.5.3",
+    "scipy==1.15.2",
+    "xgboost==2.1.4",
+    "fastapi==0.115.14",
+    "uvicorn==0.34.3",
+]
+frontend = [
+    "streamlit==1.56.0",
+    "requests==2.32.3",
+]
+dev = [
+    "matplotlib==3.10.8",
+    "seaborn==0.13.2",
+    "pyyaml==6.0.3",
+    "statsmodels==0.14.4",
+    "jupyter==1.1.1",
+    "nbconvert==7.16.6",
+]
+all = [
+    "ANL488-FYP[backend]",
+    "ANL488-FYP[frontend]",
+    "ANL488-FYP[dev]",
+]
