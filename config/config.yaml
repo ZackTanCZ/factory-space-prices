@@ -1,4 +1,6 @@
 defaults:
-  - data: constraints
-  - api: settings
   - _self_
+  - data/constraints
+  - data/feature_values
+  - api/settings
+
