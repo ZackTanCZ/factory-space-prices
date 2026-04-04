@@ -1,28 +1,32 @@
 """
-FastAPI backend — exposes /predict endpoint.
+FastAPI backend — exposes /predict, /health, /options, /constraints endpoints.
 
 Run with:
     uvicorn backend.api:app --reload --port 8000
 """
 
+import logging
 import sys
 from pathlib import Path
 from contextlib import asynccontextmanager
 
 sys.path.append(str(Path(__file__).parent.parent))
 
-from fastapi import FastAPI, HTTPException
+from omegaconf import OmegaConf
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from backend.models import PropertyInput, PredictionResponse
-from src.inference import predict, _load_artifacts, PLANNING_AREAS, REGIONS, FLOOR_LEVELS, SALE_TYPES
+
+from backend.dependencies import initialize_services, get_orchestrator
+from src.models.prediction import PropertyInput, PredictionResponse
+from src.services.inference import PLANNING_AREAS, REGIONS, FLOOR_LEVELS, SALE_TYPES
+from src.services.orchestrator import InferenceOrchestrator
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Preload model artifacts into memory on startup
-    print("Loading model artifacts...")
-    _load_artifacts()
-    print("Model artifacts loaded. Ready to serve.")
+    initialize_services()
     yield
 
 
@@ -33,7 +37,6 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Allow Streamlit frontend (running on port 8501) to call this API
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -58,10 +61,21 @@ def options():
     }
 
 
+@app.get("/constraints")
+def constraints(orchestrator: InferenceOrchestrator = Depends(get_orchestrator)):
+    """Return validation constraints for the frontend input bounds."""
+    return OmegaConf.to_container(orchestrator.constraints, resolve=True)
+
+
 @app.post("/predict", response_model=PredictionResponse)
-def predict_price(data: PropertyInput):
+def predict_price(
+    data: PropertyInput,
+    orchestrator: InferenceOrchestrator = Depends(get_orchestrator),
+):
     try:
-        result = predict(**data.model_dump())
-        return result
+        return orchestrator.predict(**data.model_dump())
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error("Prediction failed: %s", e)
+        raise HTTPException(status_code=500, detail="Prediction failed. Please check your inputs.")

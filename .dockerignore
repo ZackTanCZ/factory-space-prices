@@ -1,0 +1,30 @@
+# Virtual environment
+.venv_BMAD/
+
+# Notebooks and development files
+notebooks/
+*.ipynb
+
+# Raw and processed data (not needed at inference time)
+data/
+
+# Development and project management
+_bmad/
+_bmad-output/
+design-artifacts/
+docs/
+others/
+scripts/
+interview_prep.md
+project_journal.md
+CLAUDE.md
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Git
+.git/
+.gitignore

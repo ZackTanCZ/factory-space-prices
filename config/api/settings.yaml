@@ -1,0 +1,7 @@
+# API and model artifact settings
+model_path: models/xgboost_reduced.pkl
+target_encoder_path: models/target_encoder.pkl
+onehot_encoder_path: models/onehot_encoder.pkl
+
+cors_origins:
+  - "*"

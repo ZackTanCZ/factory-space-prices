@@ -23,15 +23,21 @@ st.set_page_config(
 st.title("🏭 Factory Price Predictor")
 st.caption("Singapore industrial property — unit price estimate ($ psf)")
 
-# Fetch dropdown options from backend
-try:
+# Fetch dropdown options and validation constraints from backend
+@st.cache_data
+def fetch_backend_config():
     options = requests.get(f"{BACKEND_URL}/options", timeout=5).json()
+    constraints = requests.get(f"{BACKEND_URL}/constraints", timeout=5).json()
+    return options, constraints
+
+try:
+    options, constraints = fetch_backend_config()
     PLANNING_AREAS = options["planning_areas"]
     REGIONS = options["regions"]
     FLOOR_LEVELS = options["floor_levels"]
     SALE_TYPES = options["sale_types"]
 except Exception:
-    st.error("Cannot connect to backend. Make sure the API is running on port 8000.")
+    st.error(f"Cannot connect to backend at {BACKEND_URL}. Make sure the API is running.")
     st.stop()
 
 st.divider()
@@ -45,27 +51,27 @@ with st.form("prediction_form"):
     with left_col:
         area_sqft = st.number_input(
             "Floor Area (sqft)",
-            min_value=100.0,
-            max_value=50000.0,
+            min_value=float(constraints["area_sqft"]["min"]),
+            max_value=float(constraints["area_sqft"]["max"]),
             value=1500.0,
             step=50.0,
         )
         remaining_lease_years = st.number_input(
             "Remaining Lease (years)",
-            min_value=1.0,
-            max_value=99.0,
+            min_value=float(constraints["remaining_lease_years"]["min"]),
+            max_value=float(constraints["remaining_lease_years"]["max"]),
             value=45.0,
             step=1.0,
         )
         lease_duration = st.selectbox(
             "Total Lease Duration (years)",
-            options=[30, 60, 99],
+            options=constraints["lease_duration"]["valid_values"],
             index=1,
         )
         dist_to_mrt_m = st.number_input(
             "Distance to Nearest MRT (metres)",
-            min_value=0.0,
-            max_value=10000.0,
+            min_value=float(constraints["dist_to_mrt_m"]["min"]),
+            max_value=float(constraints["dist_to_mrt_m"]["max"]),
             value=800.0,
             step=50.0,
         )
@@ -80,7 +86,7 @@ with st.form("prediction_form"):
 
 # --- Prediction ---
 if submitted:
-    if remaining_lease_years > lease_duration:
+    if remaining_lease_years > float(lease_duration):
         st.error("Remaining lease years cannot exceed total lease duration.")
     else:
         payload = {
@@ -103,11 +109,15 @@ if submitted:
                 )
                 response.raise_for_status()
                 result = response.json()
-            except requests.exceptions.HTTPError as e:
-                st.error(f"Prediction failed: {response.json().get('detail', str(e))}")
+            except requests.exceptions.HTTPError:
+                try:
+                    detail = response.json().get("detail", "Unknown error")
+                except Exception:
+                    detail = response.text
+                st.error(f"Prediction failed: {detail}")
                 st.stop()
             except Exception as e:
-                st.error(f"Could not reach backend: {e}")
+                st.error(f"Could not reach backend at {BACKEND_URL}: {e}")
                 st.stop()
 
         st.divider()
