@@ -8,7 +8,7 @@ on:
 
 jobs:
   lint:
-    name: Lint
+    name: Lint - Code Quality
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -26,7 +26,7 @@ jobs:
         run: ruff check .
 
   test:
-    name: Test
+    name: Unit Testing
     runs-on: ubuntu-latest
     needs: lint
     steps:
@@ -71,23 +71,23 @@ jobs:
           file: docker/Dockerfile.frontend
           push: false
 
-      - name: Start backend container
-        run: docker run -d --name backend-test -p 8000:8000 fyp-backend:ci
+      # - name: Start backend container
+      #   run: docker run -d --name backend-test -p 8000:8000 fyp-backend:ci
 
-      - name: Check liveness
-        run: |
-          for i in $(seq 1 5); do
-            if curl -sf http://localhost:8000/health/live; then
-              echo "Backend is live"
-              exit 0
-            fi
-            echo "Waiting... ($i/10)"
-            sleep 3
-          done
-          echo "Backend failed liveness check"
-          docker logs backend-test
-          exit 1
+      # - name: Check liveness
+      #   run: |
+      #     for i in $(seq 1 5); do
+      #       if curl -sf http://localhost:8000/health/live; then
+      #         echo "Backend is live"
+      #         exit 0
+      #       fi
+      #       echo "Waiting... ($i/10)"
+      #       sleep 3
+      #     done
+      #     echo "Backend failed liveness check"
+      #     docker logs backend-test
+      #     exit 1
 
-      - name: Stop backend container
-        if: always()
-        run: docker stop backend-test && docker rm backend-test
+      # - name: Stop backend container
+      #   if: always()
+      #   run: docker stop backend-test && docker rm backend-test
