@@ -21,10 +21,11 @@ RUN groupadd --gid 1000 appgroup && \
 # Copy installed packages from builder
 COPY --from=builder /app/deps /usr/local/lib/python3.12/site-packages/
 
-# Copy application code and model artifacts
+# Copy application code, config, and model artifacts
 COPY src/ ./src/
 COPY backend/ ./backend/
 COPY models/ ./models/
+COPY config/ ./config/
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1

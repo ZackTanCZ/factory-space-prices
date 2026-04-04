@@ -1,0 +1,17 @@
+# Validation constraints derived from training data distribution
+# Max area based on training data max (21,022 sqft) + buffer
+area_sqft:
+  min: 100
+  max: 25000
+
+remaining_lease_years:
+  min: 1
+  max: 99
+
+dist_to_mrt_m:
+  min: 0
+  max: 10000
+
+# Only valid Singapore industrial lease tenors
+lease_duration:
+  valid_values: [30, 60, 99]
