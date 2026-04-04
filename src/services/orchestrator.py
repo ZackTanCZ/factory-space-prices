@@ -11,7 +11,7 @@ from pathlib import Path
 import joblib
 from omegaconf import DictConfig, OmegaConf
 
-from src.services.inference import preprocess, predict_with
+from src.services.inference import predict_with, preprocess
 
 logger = logging.getLogger(__name__)
 

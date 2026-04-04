@@ -34,5 +34,9 @@ def initialize_services() -> None:
     logger.info("Config loaded.")
 
     logger.info("Loading model artifacts...")
-    _orchestrator = InferenceOrchestrator(cfg=cfg, project_root=PROJECT_ROOT)
+    try:
+        _orchestrator = InferenceOrchestrator(cfg=cfg, project_root=PROJECT_ROOT)
+    except FileNotFoundError as e:
+        logger.error("Model artifact not found — cannot start: %s", e)
+        raise
     logger.info("Model artifacts loaded. Ready to serve.")
