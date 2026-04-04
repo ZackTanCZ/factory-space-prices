@@ -34,29 +34,6 @@ FEATURE_COLS = [
     "Type of Sale_Resale",
 ]
 
-# Valid categorical values (sourced from training data)
-PLANNING_AREAS = sorted([
-    "Ang Mo Kio", "Bedok", "Bishan", "Boon Lay", "Bukit Batok",
-    "Bukit Merah", "Changi", "Clementi", "Geylang", "Jurong East",
-    "Jurong West", "Kallang", "Pasir Ris", "Paya Lebar", "Pioneer",
-    "Queenstown", "Sembawang", "Serangoon", "Sungei Kadut", "Tampines",
-    "Toa Payoh", "Tuas", "Woodlands", "Yishun",
-])
-
-REGIONS = [
-    "Central Region",
-    "East Region",
-    "North Region",
-    "North-East Region",
-    "West Region",
-]
-
-FLOOR_LEVELS = ["First Floor", "Non-First Floor", "Unknown"]
-SALE_TYPES = ["New Sale", "Resale"]
-
-# Model test RMSE from notebook 09a — used for prediction interval
-MODEL_RMSE = 44.70
-
 
 def preprocess(
     area_sqft: float,
@@ -109,14 +86,14 @@ def preprocess(
     return pd.DataFrame([feature_dict])[FEATURE_COLS]
 
 
-def predict_with(model, X: pd.DataFrame, area_sqft: float) -> dict:
+def predict_with(model, X: pd.DataFrame, area_sqft: float, model_rmse: float) -> dict:
     predicted_psf = float(model.predict(X)[0])
     total_price = predicted_psf * area_sqft
 
     return {
         "predicted_psf": round(predicted_psf, 2),
         "total_price": round(total_price, 2),
-        "lower_bound": round(predicted_psf - MODEL_RMSE, 2),
-        "upper_bound": round(predicted_psf + MODEL_RMSE, 2),
-        "rmse": MODEL_RMSE,
+        "lower_bound": round(predicted_psf - model_rmse, 2),
+        "upper_bound": round(predicted_psf + model_rmse, 2),
+        "rmse": model_rmse,
     }

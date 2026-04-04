@@ -9,21 +9,23 @@ import logging
 from pathlib import Path
 
 import joblib
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
 
 from src.services.inference import preprocess, predict_with
-from src.services.inference import PLANNING_AREAS, REGIONS, FLOOR_LEVELS, SALE_TYPES
 
 logger = logging.getLogger(__name__)
 
 
 class InferenceOrchestrator:
     def __init__(self, cfg: DictConfig, project_root: Path) -> None:
-        self.constraints = cfg.data
+        self.cfg = cfg
+        self.constraints = self.cfg.constraints
+        self.feature_values = self.cfg.feature_values
+        self.api_settings = self.cfg.settings
 
-        self.model = joblib.load(project_root / cfg.api.model_path)
-        self.target_encoder = joblib.load(project_root / cfg.api.target_encoder_path)
-        self.ohe = joblib.load(project_root / cfg.api.onehot_encoder_path)
+        self.model = joblib.load(project_root / self.api_settings.model_path)
+        self.target_encoder = joblib.load(project_root / self.api_settings.target_encoder_path)
+        self.ohe = joblib.load(project_root / self.api_settings.onehot_encoder_path)
 
         logger.info("InferenceOrchestrator initialised — model artifacts loaded.")
 
@@ -59,14 +61,20 @@ class InferenceOrchestrator:
         if not (c.dist_to_mrt_m.min <= dist_to_mrt_m <= c.dist_to_mrt_m.max):
             raise ValueError(f"dist_to_mrt_m must be between {c.dist_to_mrt_m.min} and {c.dist_to_mrt_m.max}")
 
-        if planning_area not in PLANNING_AREAS:
+        if planning_area not in self.feature_values.planning_areas:
             raise ValueError(f"Unknown planning area: {planning_area}")
-        if region not in REGIONS:
+        if region not in self.feature_values.regions:
             raise ValueError(f"Unknown region: {region}")
-        if floor_level not in FLOOR_LEVELS:
+        if floor_level not in self.feature_values.floor_levels:
             raise ValueError(f"Unknown floor level: {floor_level}")
-        if type_of_sale not in SALE_TYPES:
+        if type_of_sale not in self.feature_values.sale_types:
             raise ValueError(f"Unknown type of sale: {type_of_sale}")
+
+    def get_constraints(self) -> dict:
+        return OmegaConf.to_container(self.constraints, resolve=True)
+
+    def get_feature_values(self) -> dict:
+        return OmegaConf.to_container(self.feature_values, resolve=True)
 
     def predict(
         self,
@@ -91,4 +99,4 @@ class InferenceOrchestrator:
             ohe=self.ohe,
         )
 
-        return predict_with(self.model, X, area_sqft)
+        return predict_with(self.model, X, area_sqft, float(self.api_settings.model_rmse))

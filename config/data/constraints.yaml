@@ -1,3 +1,5 @@
+# @package constraints
+
 # Validation constraints derived from training data distribution
 # Max area based on training data max (21,022 sqft) + buffer
 area_sqft:

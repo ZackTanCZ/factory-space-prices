@@ -6,19 +6,13 @@ Run with:
 """
 
 import logging
-import sys
-from pathlib import Path
 from contextlib import asynccontextmanager
 
-sys.path.append(str(Path(__file__).parent.parent))
-
-from omegaconf import OmegaConf
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.dependencies import initialize_services, get_orchestrator
 from src.models.prediction import PropertyInput, PredictionResponse
-from src.services.inference import PLANNING_AREAS, REGIONS, FLOOR_LEVELS, SALE_TYPES
 from src.services.orchestrator import InferenceOrchestrator
 
 logger = logging.getLogger(__name__)
@@ -51,20 +45,15 @@ def health():
 
 
 @app.get("/options")
-def options():
+def options(orchestrator: InferenceOrchestrator = Depends(get_orchestrator)):
     """Return valid categorical options for the frontend dropdowns."""
-    return {
-        "planning_areas": PLANNING_AREAS,
-        "regions": REGIONS,
-        "floor_levels": FLOOR_LEVELS,
-        "sale_types": SALE_TYPES,
-    }
+    return orchestrator.get_feature_values()
 
 
 @app.get("/constraints")
 def constraints(orchestrator: InferenceOrchestrator = Depends(get_orchestrator)):
     """Return validation constraints for the frontend input bounds."""
-    return OmegaConf.to_container(orchestrator.constraints, resolve=True)
+    return orchestrator.get_constraints()
 
 
 @app.post("/predict", response_model=PredictionResponse)

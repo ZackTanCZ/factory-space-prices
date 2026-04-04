@@ -1,0 +1,43 @@
+# @package feature_values
+
+planning_areas:
+  - Ang Mo Kio
+  - Bedok
+  - Bishan
+  - Boon Lay
+  - Bukit Batok
+  - Bukit Merah
+  - Changi
+  - Clementi
+  - Geylang
+  - Jurong East
+  - Jurong West
+  - Kallang
+  - Pasir Ris
+  - Paya Lebar
+  - Pioneer
+  - Queenstown
+  - Sembawang
+  - Serangoon
+  - Sungei Kadut
+  - Tampines
+  - Toa Payoh
+  - Tuas
+  - Woodlands
+  - Yishun
+
+regions:
+  - Central Region
+  - East Region
+  - North Region
+  - North-East Region
+  - West Region
+
+floor_levels:
+  - First Floor
+  - Non-First Floor
+  - Unknown
+
+sale_types:
+  - New Sale
+  - Resale

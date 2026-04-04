@@ -10,7 +10,6 @@ import os
 from pathlib import Path
 
 from hydra import compose, initialize_config_dir
-from omegaconf import DictConfig
 
 from src.services.orchestrator import InferenceOrchestrator
 
@@ -19,7 +18,6 @@ logger = logging.getLogger(__name__)
 PROJECT_ROOT = Path(os.environ.get("PROJECT_ROOT", Path(__file__).parent.parent))
 CONFIG_DIR = str(PROJECT_ROOT / "config")
 
-_cfg: DictConfig = None
 _orchestrator: InferenceOrchestrator = None
 
 
@@ -28,15 +26,13 @@ def get_orchestrator() -> InferenceOrchestrator:
 
 
 def initialize_services() -> None:
-    global _cfg, _orchestrator
+    global _orchestrator
 
     logger.info("Loading config...")
     with initialize_config_dir(config_dir=CONFIG_DIR, version_base=None):
-        _cfg = compose(config_name="config")
+        cfg = compose(config_name="config")
     logger.info("Config loaded.")
 
     logger.info("Loading model artifacts...")
-    _orchestrator = InferenceOrchestrator(cfg=_cfg, project_root=PROJECT_ROOT)
+    _orchestrator = InferenceOrchestrator(cfg=cfg, project_root=PROJECT_ROOT)
     logger.info("Model artifacts loaded. Ready to serve.")
-
-
