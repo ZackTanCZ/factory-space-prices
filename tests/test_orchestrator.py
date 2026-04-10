@@ -1,9 +1,7 @@
 """Unit tests for src/services/orchestrator.py — validation and serialisation."""
 
 import pytest
-
 from omegaconf import DictConfig
-
 
 # ---------------------------------------------------------------------------
 # _validate() — happy path

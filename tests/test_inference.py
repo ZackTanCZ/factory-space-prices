@@ -3,9 +3,7 @@
 import pytest
 
 from src.services.inference import predict_with, preprocess
-
 from tests.conftest import FEATURE_COLS
-
 
 # ---------------------------------------------------------------------------
 # preprocess()
@@ -26,20 +24,20 @@ def sample_input():
 
 
 def test_preprocess_returns_correct_columns(sample_input, dummy_target_encoder, dummy_ohe):
-    X = preprocess(**sample_input, target_encoder=dummy_target_encoder, 
+    X = preprocess(**sample_input, target_encoder=dummy_target_encoder,
                    ohe=dummy_ohe, feature_cols=FEATURE_COLS)
     assert list(X.columns) == FEATURE_COLS
 
 
 def test_preprocess_returns_single_row(sample_input, dummy_target_encoder, dummy_ohe):
-    X = preprocess(**sample_input, target_encoder=dummy_target_encoder, 
+    X = preprocess(**sample_input, target_encoder=dummy_target_encoder,
                    ohe=dummy_ohe, feature_cols=FEATURE_COLS)
     assert X.shape == (1, len(FEATURE_COLS))
 
 
 def test_preprocess_unknown_planning_area_falls_back_to_global_mean(sample_input, dummy_target_encoder, dummy_ohe):
     sample_input["planning_area"] = "Unknown Area"
-    X = preprocess(**sample_input, target_encoder=dummy_target_encoder, 
+    X = preprocess(**sample_input, target_encoder=dummy_target_encoder,
                    ohe=dummy_ohe, feature_cols=FEATURE_COLS)
     assert X["Planning_Area_Encoded"].iloc[0] == dummy_target_encoder["global_mean"]
 

@@ -23,7 +23,7 @@ REGIONS = ["Central Region", "East Region", "North Region", "North-East Region",
 FLOOR_LEVELS = ["First Floor", "Non-First Floor", "Unknown"]
 SALE_TYPES = ["New Sale", "Resale"]
 FEATURE_COLS = ["Log_Area", "Remaining_Lease_Years", "Lease_Remaining_Ratio", "dist_to_mrt_m", "Planning_Area_Encoded",
-                "Region_East Region", "Region_North Region", "Region_North-East Region", "Region_West Region", 
+                "Region_East Region", "Region_North Region", "Region_North-East Region", "Region_West Region",
                 "Floor Level_Non-First Floor", "Floor Level_Unknown", "Type of Sale_Resale"]
 
 
