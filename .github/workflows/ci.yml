@@ -81,7 +81,7 @@ jobs:
               echo "Backend is live"
               exit 0
             fi
-            echo "Waiting... ($i/10)"
+            echo "Waiting... ($i/5)"
             sleep 3
           done
           echo "Backend failed liveness check"

@@ -22,6 +22,7 @@ class InferenceOrchestrator:
         self.constraints = self.cfg.constraints
         self.feature_values = self.cfg.feature_values
         self.api_settings = self.cfg.settings
+        self.feature_cols = self.cfg.feature_cols.feature_cols
 
         self.model = joblib.load(project_root / self.api_settings.model_path)
         self.target_encoder = joblib.load(project_root / self.api_settings.target_encoder_path)
@@ -97,6 +98,7 @@ class InferenceOrchestrator:
             planning_area, floor_level, type_of_sale, region, dist_to_mrt_m,
             target_encoder=self.target_encoder,
             ohe=self.ohe,
+            feature_cols=self.feature_cols
         )
 
         return predict_with(self.model, X, area_sqft, float(self.api_settings.model_rmse))

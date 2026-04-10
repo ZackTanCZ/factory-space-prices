@@ -19,21 +19,21 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
-# Expected feature columns in the exact order the model was trained on
-FEATURE_COLS = [
-    "Log_Area",
-    "Remaining_Lease_Years",
-    "Lease_Remaining_Ratio",
-    "dist_to_mrt_m",
-    "Planning_Area_Encoded",
-    "Region_East Region",
-    "Region_North Region",
-    "Region_North-East Region",
-    "Region_West Region",
-    "Floor Level_Non-First Floor",
-    "Floor Level_Unknown",
-    "Type of Sale_Resale",
-]
+# # Expected feature columns in the exact order the model was trained on
+# FEATURE_COLS = [
+#     "Log_Area",
+#     "Remaining_Lease_Years",
+#     "Lease_Remaining_Ratio",
+#     "dist_to_mrt_m",
+#     "Planning_Area_Encoded",
+#     "Region_East Region",
+#     "Region_North Region",
+#     "Region_North-East Region",
+#     "Region_West Region",
+#     "Floor Level_Non-First Floor",
+#     "Floor Level_Unknown",
+#     "Type of Sale_Resale",
+# ]
 
 
 def preprocess(
@@ -47,6 +47,7 @@ def preprocess(
     dist_to_mrt_m: float,
     target_encoder: dict,
     ohe,
+    feature_cols: list
 ) -> pd.DataFrame:
     # 1. Log-transform area
     log_area = np.log(area_sqft)
@@ -84,7 +85,7 @@ def preprocess(
         feature_dict[col] = float(ohe_df[col].values[0])
 
     # 6. Build DataFrame with exact column order matching training
-    return pd.DataFrame([feature_dict])[FEATURE_COLS]
+    return pd.DataFrame([feature_dict])[feature_cols]
 
 
 def predict_with(model, X: pd.DataFrame, area_sqft: float, model_rmse: float) -> dict:
