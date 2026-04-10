@@ -28,9 +28,18 @@ dev = [
     "statsmodels==0.14.4",
     "jupyter==1.1.1",
     "nbconvert==7.16.6",
+    "ruff==0.11.2",
+    "pytest==8.3.5",
 ]
 all = [
     "ANL488-FYP[backend]",
     "ANL488-FYP[frontend]",
     "ANL488-FYP[dev]",
 ]
+
+[tool.ruff]
+line-length = 120
+exclude = ["notebooks/", ".venv_BMAD/", ".claude/", "data/", "models/", "others/"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]

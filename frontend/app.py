@@ -9,6 +9,7 @@ Requires backend to be running:
 """
 
 import os
+
 import requests
 import streamlit as st
 

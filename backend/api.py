@@ -11,8 +11,8 @@ from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.dependencies import initialize_services, get_orchestrator
-from src.models.prediction import PropertyInput, PredictionResponse
+from backend.dependencies import get_orchestrator, initialize_services
+from src.models.prediction import PredictionResponse, PropertyInput
 from src.services.orchestrator import InferenceOrchestrator
 
 logger = logging.getLogger(__name__)
@@ -39,8 +39,15 @@ app.add_middleware(
 )
 
 
-@app.get("/health")
-def health():
+@app.get("/health/live")
+def liveness():
+    return {"status": "ok"}
+
+
+@app.get("/health/ready")
+def readiness(orchestrator: InferenceOrchestrator = Depends(get_orchestrator)):
+    if orchestrator is None:
+        raise HTTPException(status_code=503, detail="Model not loaded")
     return {"status": "ok"}
 
 
