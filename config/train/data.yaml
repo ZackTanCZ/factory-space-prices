@@ -1,4 +1,4 @@
-# @package train.data
+# @package train_data
 
 input_path: data/processed/factory_engineered.csv
 target_col: "Unit Price ($ psf)"

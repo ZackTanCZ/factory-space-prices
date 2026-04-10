@@ -1,4 +1,4 @@
-# @package train.model
+# @package train_model
 
 # XGBoost hyperparameters — tuned via GridSearchCV in notebook 08
 n_estimators: 200
