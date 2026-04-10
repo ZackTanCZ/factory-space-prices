@@ -1,12 +1,29 @@
 # @package train_data
 
+# Path to the feature-engineered dataset (output of notebook 04/04a)
 input_path: data/processed/factory_engineered.csv
+
+# Target column to predict — raw price per square foot in SGD
 target_col: "Unit Price ($ psf)"
 
+# Fraction of data held out for evaluation
 test_size: 0.2
+
+# Seed for reproducible train/test split
 random_state: 42
 
-# Columns dropped before training — macro features removed per 09a ablation study
+# Column to apply target encoding — replaced with mean target value per category
+target_encode_col: "Planning Area"
+
+# Columns to one-hot encode — drop='first' applied to avoid multicollinearity
+cat_cols:
+  - Region
+  - Floor Level
+  - Type of Sale
+
+# Columns dropped before training
+# Macro features removed per notebook 09a ablation study — negligible impact on RMSE
+# Identifier columns removed as they carry no predictive signal
 drop_cols:
   - GDP_YoY_Growth_Rate
   - CPI_All_Items
@@ -14,6 +31,8 @@ drop_cols:
   - 10Y_Bond_Yield
   - SORA_3M_Compounded
   - Cement_Bulk_Per_Tonne
+  - Price_Index
+  - Steel_Rebar_Per_Tonne
   - Contract Date
   - Project Name
   - Street Name
