@@ -1,0 +1,6 @@
+defaults:
+  - _self_
+  - train/data
+  - train/model
+
+output_dir: models/
