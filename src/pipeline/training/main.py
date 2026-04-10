@@ -4,7 +4,7 @@ Entry point for the training pipeline.
 Loads Hydra config and instantiates TrainingPipeline.
 
 Usage:
-    python src/pipeline/training/main.py
+    python -m src.pipeline.training.main
 """
 
 import logging

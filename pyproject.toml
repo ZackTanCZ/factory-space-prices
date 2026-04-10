@@ -1,5 +1,5 @@
 [project]
-name = "ANL488-FYP"
+name = "ANL488_FYP"
 version = "0.1.0"
 description = "ML project for Factory price prediction"
 requires-python = ">=3.12"
@@ -32,9 +32,9 @@ dev = [
     "pytest==8.3.5",
 ]
 all = [
-    "ANL488-FYP[backend]",
-    "ANL488-FYP[frontend]",
-    "ANL488-FYP[dev]",
+    "ANL488_FYP[backend]",
+    "ANL488_FYP[frontend]",
+    "ANL488_FYP[dev]",
 ]
 
 [tool.ruff]
