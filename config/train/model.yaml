@@ -6,7 +6,7 @@
 _target_: xgboost.XGBRegressor
 
 # XGBoost hyperparameters — tuned via GridSearchCV in notebook 08
-n_estimators: 200
+n_estimators: 150
 max_depth: 5
 learning_rate: 0.1
 subsample: 0.8

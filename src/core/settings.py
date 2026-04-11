@@ -20,7 +20,8 @@ class Settings(BaseSettings):
 
     # MLflow tracking server — update when deploying to a remote server
     MLFLOW_TRACKING_URI: str = "http://localhost:5000"
-    MLFLOW_EXPERIMENT_NAME: str = ""
+    MLFLOW_EXPERIMENT_NAME: str = "FYP-Factory-Price-Prediction"
+    MLFLOW_MODEL_NAME:str ="factory-price-prediction"
 
     # Backend URL — update when deploying (must match BACKEND_PORT in local dev)
     BACKEND_URL: str = "http://localhost:8000"

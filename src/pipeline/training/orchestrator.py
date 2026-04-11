@@ -11,6 +11,7 @@ from pathlib import Path
 
 import joblib
 import mlflow
+import mlflow.sklearn
 import pandas as pd
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
@@ -78,24 +79,26 @@ class TrainingPipeline:
         logger.info("Test R²:   %.4f", self.metrics["r2"])
 
     def save_artifacts(self) -> None:
+        # Encoders are serialised to models/ temporarily so mlflow.log_artifact()
+        # has a source file to read. They are deleted after logging — models/ is
+        # reserved for champion artifacts exported via export_model.py.
+        target_encoder_path = self.project_root / self.cfg.settings.target_encoder_path
+        ohe_path = self.project_root / self.cfg.settings.onehot_encoder_path
         try:
-            model_path = self.project_root / self.cfg.settings.model_path
-            target_encoder_path = self.project_root / self.cfg.settings.target_encoder_path
-            ohe_path = self.project_root / self.cfg.settings.onehot_encoder_path
-
-            joblib.dump(self.model, model_path)
             joblib.dump(self.target_encoder, target_encoder_path)
             joblib.dump(self.ohe, ohe_path)
-            logger.info("Artifacts saved to %s", self.project_root / "models/")
 
-            if mlflow.active_run():
-                mlflow.log_artifact(str(model_path), artifact_path="models")
-                mlflow.log_artifact(str(target_encoder_path), artifact_path="models")
-                mlflow.log_artifact(str(ohe_path), artifact_path="models")
-                logger.info("Artifacts logged to MLflow.")
+            # Log model in MLflow format under a known path for register_model()
+            mlflow.sklearn.log_model(self.model, artifact_path="model")
+            mlflow.log_artifact(str(target_encoder_path), artifact_path="encoders")
+            mlflow.log_artifact(str(ohe_path), artifact_path="encoders")
+            logger.info("Artifacts logged to MLflow.")
         except OSError as e:
             logger.error("Failed to save artifacts — check output path and permissions: %s", e)
             raise
+        finally:
+            target_encoder_path.unlink(missing_ok=True)
+            ohe_path.unlink(missing_ok=True)
 
     def _validate_config(self) -> None:
         input_path = self.project_root / self.cfg.train_data.input_path
@@ -125,27 +128,26 @@ class TrainingPipeline:
         self._validate_config()
         self.load_data()
         self.encode()
-        self.train()
-        self.evaluate()
 
-        tracking_uri = get_settings().MLFLOW_TRACKING_URI
-        experiment_name = get_settings().MLFLOW_EXPERIMENT_NAME
-        mlflow.set_tracking_uri(tracking_uri)
-        mlflow.set_experiment(experiment_name)
+        settings = get_settings()
+        mlflow.set_tracking_uri(settings.MLFLOW_TRACKING_URI)
+        mlflow.set_experiment(settings.MLFLOW_EXPERIMENT_NAME)
 
         with mlflow.start_run():
+            self.train()
+            self.evaluate()
+
             params = OmegaConf.to_container(self.cfg.train_model, resolve=True)
             params.pop("_target_", None)
             params["test_size"] = self.cfg.train_data.test_size
             mlflow.log_params(params)
-            mlflow.log_metrics(
-                {
-                    "rmse": self.metrics["rmse"],
-                    "mae": self.metrics["mae"],
-                    "r2": self.metrics["r2"],
-                }
-            )
-            logger.info("Metrics logged to MLflow (tracking URI: %s).", tracking_uri)
+            mlflow.log_metrics({
+                "rmse": self.metrics["rmse"],
+                "mae": self.metrics["mae"],
+                "r2": self.metrics["r2"],
+            })
             self.save_artifacts()
 
-
+            run_id = mlflow.active_run().info.run_id
+            mlflow.register_model(model_uri=f"runs:/{run_id}/model", name=settings.MLFLOW_MODEL_NAME)
+            logger.info("Model registered as '%s' in MLflow registry.", settings.MLFLOW_MODEL_NAME)
