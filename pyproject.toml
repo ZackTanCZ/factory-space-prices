@@ -7,7 +7,7 @@ dependencies = []
 
 [project.optional-dependencies]
 backend = [
-    "pandas==3.0.1",
+    "pandas==2.2.3",
     "numpy==2.4.3",
     "scikit-learn==1.8.0",
     "joblib==1.5.3",
@@ -16,6 +16,7 @@ backend = [
     "fastapi==0.115.14",
     "uvicorn==0.34.3",
     "hydra-core==1.3.2",
+    "pydantic-settings==2.9.1",
 ]
 frontend = [
     "streamlit==1.56.0",

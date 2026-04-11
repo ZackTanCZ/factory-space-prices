@@ -7,14 +7,15 @@ All transformation logic lives in steps.py as pure functions.
 """
 
 import logging
-import os
 from pathlib import Path
 
 import joblib
 import mlflow
 import pandas as pd
-from omegaconf import DictConfig
-from xgboost import XGBRegressor
+from hydra.utils import instantiate
+from omegaconf import DictConfig, OmegaConf
+
+from src.core.settings import get_settings
 
 from src.pipeline.training.steps import (
     apply_ohe,
@@ -66,17 +67,8 @@ class TrainingPipeline:
         logger.info("Encoding complete. Total features (%d): %s", self.X_train.shape[1], list(self.X_train.columns))
 
     def train(self) -> None:
-        logger.info("Training XGBRegressor...")
-        self.model = XGBRegressor(
-            n_estimators=self.cfg.train_model.n_estimators,
-            max_depth=self.cfg.train_model.max_depth,
-            learning_rate=self.cfg.train_model.learning_rate,
-            subsample=self.cfg.train_model.subsample,
-            colsample_bytree=self.cfg.train_model.colsample_bytree,
-            random_state=self.cfg.train_model.random_state,
-            n_jobs=-1,
-            verbosity=0,
-        )
+        self.model = instantiate(self.cfg.train_model)
+        logger.info("Training %s...", self.model.__class__.__name__)
         self.model.fit(self.X_train, self.y_train)
         logger.info("Training complete.")
 
@@ -137,22 +129,16 @@ class TrainingPipeline:
         self.train()
         self.evaluate()
 
-        tracking_uri = os.environ.get("MLFLOW_TRACKING_URI", "http://localhost:5000")
+        tracking_uri = get_settings().MLFLOW_TRACKING_URI
+        experiment_name = get_settings().MLFLOW_EXPERIMENT_NAME
         mlflow.set_tracking_uri(tracking_uri)
-        mlflow.set_experiment("factory-price-prediction")
+        mlflow.set_experiment(experiment_name)
 
         with mlflow.start_run():
-            mlflow.log_params(
-                {
-                    "n_estimators": self.cfg.train_model.n_estimators,
-                    "max_depth": self.cfg.train_model.max_depth,
-                    "learning_rate": self.cfg.train_model.learning_rate,
-                    "subsample": self.cfg.train_model.subsample,
-                    "colsample_bytree": self.cfg.train_model.colsample_bytree,
-                    "random_state": self.cfg.train_model.random_state,
-                    "test_size": self.cfg.train_data.test_size,
-                }
-            )
+            params = OmegaConf.to_container(self.cfg.train_model, resolve=True)
+            params.pop("_target_", None)
+            params["test_size"] = self.cfg.train_data.test_size
+            mlflow.log_params(params)
             mlflow.log_metrics(
                 {
                     "rmse": self.metrics["rmse"],
