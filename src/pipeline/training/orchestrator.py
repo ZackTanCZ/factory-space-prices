@@ -7,9 +7,11 @@ All transformation logic lives in steps.py as pure functions.
 """
 
 import logging
+import os
 from pathlib import Path
 
 import joblib
+import mlflow
 import pandas as pd
 from omegaconf import DictConfig
 from xgboost import XGBRegressor
@@ -86,10 +88,20 @@ class TrainingPipeline:
 
     def save_artifacts(self) -> None:
         try:
-            joblib.dump(self.model, self.project_root / self.cfg.settings.model_path)
-            joblib.dump(self.target_encoder, self.project_root / self.cfg.settings.target_encoder_path)
-            joblib.dump(self.ohe, self.project_root / self.cfg.settings.onehot_encoder_path)
+            model_path = self.project_root / self.cfg.settings.model_path
+            target_encoder_path = self.project_root / self.cfg.settings.target_encoder_path
+            ohe_path = self.project_root / self.cfg.settings.onehot_encoder_path
+
+            joblib.dump(self.model, model_path)
+            joblib.dump(self.target_encoder, target_encoder_path)
+            joblib.dump(self.ohe, ohe_path)
             logger.info("Artifacts saved to %s", self.project_root / "models/")
+
+            if mlflow.active_run():
+                mlflow.log_artifact(str(model_path), artifact_path="models")
+                mlflow.log_artifact(str(target_encoder_path), artifact_path="models")
+                mlflow.log_artifact(str(ohe_path), artifact_path="models")
+                logger.info("Artifacts logged to MLflow.")
         except OSError as e:
             logger.error("Failed to save artifacts — check output path and permissions: %s", e)
             raise
@@ -124,6 +136,31 @@ class TrainingPipeline:
         self.encode()
         self.train()
         self.evaluate()
-        self.save_artifacts()
+
+        tracking_uri = os.environ.get("MLFLOW_TRACKING_URI", "http://localhost:5000")
+        mlflow.set_tracking_uri(tracking_uri)
+        mlflow.set_experiment("factory-price-prediction")
+
+        with mlflow.start_run():
+            mlflow.log_params(
+                {
+                    "n_estimators": self.cfg.train_model.n_estimators,
+                    "max_depth": self.cfg.train_model.max_depth,
+                    "learning_rate": self.cfg.train_model.learning_rate,
+                    "subsample": self.cfg.train_model.subsample,
+                    "colsample_bytree": self.cfg.train_model.colsample_bytree,
+                    "random_state": self.cfg.train_model.random_state,
+                    "test_size": self.cfg.train_data.test_size,
+                }
+            )
+            mlflow.log_metrics(
+                {
+                    "rmse": self.metrics["rmse"],
+                    "mae": self.metrics["mae"],
+                    "r2": self.metrics["r2"],
+                }
+            )
+            logger.info("Metrics logged to MLflow (tracking URI: %s).", tracking_uri)
+            self.save_artifacts()
 
 
