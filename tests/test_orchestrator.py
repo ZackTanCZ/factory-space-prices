@@ -56,8 +56,8 @@ def test_validate_rejects_invalid_lease_duration(dummy_orchestrator):
     with pytest.raises(ValueError, match="lease_duration"):
         dummy_orchestrator._validate(
             area_sqft=1000.0,
-            remaining_lease_years=110.0,
-            lease_duration=50.0,
+            remaining_lease_years=50.0,
+            lease_duration=110.0,
             planning_area="Ang Mo Kio",
             floor_level="Non-First Floor",
             type_of_sale="Resale",
