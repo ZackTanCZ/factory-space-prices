@@ -34,7 +34,7 @@ def initialize_services() -> None:
 
     logger.info("Loading config...")
     with initialize_config_dir(config_dir=CONFIG_DIR, version_base=None):
-        cfg = compose(config_name="config")
+        cfg = compose(config_name="api_config")
     logger.info("Config loaded.")
 
     logger.info("Loading model artifacts...")

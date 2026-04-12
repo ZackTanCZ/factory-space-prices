@@ -20,6 +20,16 @@ services:
       - ./backend:/app/backend
       - ./models:/app/models
 
+  mlflow:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.mlflow
+    ports:
+      - "${MLFLOW_PORT:-5000}:5000"
+    volumes:
+      - ./mlruns:/mlflow
+    profiles: ["training"]
+
   frontend:
     build:
       context: .
@@ -33,3 +43,4 @@ services:
         condition: service_healthy
     volumes:
       - ./frontend:/app/frontend
+

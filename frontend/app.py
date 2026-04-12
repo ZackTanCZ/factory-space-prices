@@ -7,7 +7,6 @@ Run with:
 Requires backend to be running:
     uvicorn backend.api:app --reload --port 8000
 """
-
 import os
 
 import requests

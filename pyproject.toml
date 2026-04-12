@@ -1,5 +1,5 @@
 [project]
-name = "ANL488-FYP"
+name = "ANL488_FYP"
 version = "0.1.0"
 description = "ML project for Factory price prediction"
 requires-python = ">=3.12"
@@ -7,7 +7,7 @@ dependencies = []
 
 [project.optional-dependencies]
 backend = [
-    "pandas==3.0.1",
+    "pandas==2.2.3",
     "numpy==2.4.3",
     "scikit-learn==1.8.0",
     "joblib==1.5.3",
@@ -16,6 +16,7 @@ backend = [
     "fastapi==0.115.14",
     "uvicorn==0.34.3",
     "hydra-core==1.3.2",
+    "pydantic-settings==2.9.1",
 ]
 frontend = [
     "streamlit==1.56.0",
@@ -30,11 +31,12 @@ dev = [
     "nbconvert==7.16.6",
     "ruff==0.11.2",
     "pytest==8.3.5",
+    "mlflow==3.11.1",
 ]
 all = [
-    "ANL488-FYP[backend]",
-    "ANL488-FYP[frontend]",
-    "ANL488-FYP[dev]",
+    "ANL488_FYP[backend]",
+    "ANL488_FYP[frontend]",
+    "ANL488_FYP[dev]",
 ]
 
 [tool.ruff]

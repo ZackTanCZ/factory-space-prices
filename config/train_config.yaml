@@ -1,0 +1,6 @@
+defaults:
+  - _self_
+  - train/data
+  - train/model
+  - api/settings
+  - data/feature_cols

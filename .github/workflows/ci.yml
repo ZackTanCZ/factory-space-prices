@@ -42,7 +42,7 @@ jobs:
         run: pip install -e ".[backend]" pytest==8.3.5
 
       - name: Run tests
-        run: echo "Tests not yet implemented — stub stage"
+        run: python -m pytest tests/ -v
 
   build:
     name: Docker Build
