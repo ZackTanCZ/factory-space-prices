@@ -7,13 +7,12 @@ Run with:
 Requires backend to be running:
     uvicorn backend.api:app --reload --port 8000
 """
+import os
 
 import requests
 import streamlit as st
 
-from src.core.settings import get_settings
-
-BACKEND_URL = get_settings().BACKEND_URL
+BACKEND_URL = os.environ.get("BACKEND_URL", "http://localhost:8000")
 
 st.set_page_config(
     page_title="Factory Price Predictor",

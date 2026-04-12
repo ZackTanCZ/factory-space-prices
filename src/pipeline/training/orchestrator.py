@@ -64,7 +64,13 @@ class TrainingPipeline:
         ohe_cols = [c for c in self.X_train.columns if any(c.startswith(cat) for cat in cat_cols)]
         logger.info("Target encoded: %s → %s_Encoded", target_encode_col, target_encode_col.replace(" ", "_"))
         logger.info("One-hot encoded: %s → %s", list(cat_cols), ohe_cols)
-        logger.info("Encoding complete. Total features (%d): %s", self.X_train.shape[1], list(self.X_train.columns))
+
+        # Reorder columns to match feature_cols.yaml — the YAML is the source of truth
+        # for column order. Both training and inference conform to it so they stay in sync.
+        feature_cols = list(self.cfg.feature_cols.feature_cols)
+        self.X_train = self.X_train[feature_cols]
+        self.X_test = self.X_test[feature_cols]
+        logger.info("Encoding complete. Feature order (%d cols): %s", self.X_train.shape[1], feature_cols)
 
     def train(self) -> None:
         self.model = instantiate(self.cfg.train_model)
@@ -79,16 +85,17 @@ class TrainingPipeline:
         logger.info("Test R²:   %.4f", self.metrics["r2"])
 
     def save_artifacts(self) -> None:
-        # Encoders are serialised to models/ temporarily so mlflow.log_artifact()
-        # has a source file to read. They are deleted after logging — models/ is
-        # reserved for champion artifacts exported via export_model.py.
-        target_encoder_path = self.project_root / self.cfg.settings.target_encoder_path
-        ohe_path = self.project_root / self.cfg.settings.onehot_encoder_path
+        # Encoders are written to TRAINING_TMP_DIR temporarily so
+        # mlflow.log_artifact() has a source file to read from. They are
+        # deleted immediately after logging. models/champion_model/ is reserved
+        # exclusively for artifacts exported via export_model.py.
+        tmp_dir = self.project_root / get_settings().TRAINING_TMP_DIR
+        target_encoder_path = tmp_dir / "target_encoder.pkl"
+        ohe_path = tmp_dir / "onehot_encoder.pkl"
         try:
             joblib.dump(self.target_encoder, target_encoder_path)
             joblib.dump(self.ohe, ohe_path)
 
-            # Log model in MLflow format under a known path for register_model()
             mlflow.sklearn.log_model(self.model, artifact_path="model")
             mlflow.log_artifact(str(target_encoder_path), artifact_path="encoders")
             mlflow.log_artifact(str(ohe_path), artifact_path="encoders")

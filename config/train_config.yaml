@@ -3,3 +3,4 @@ defaults:
   - train/data
   - train/model
   - api/settings
+  - data/feature_cols

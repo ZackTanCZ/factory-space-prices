@@ -1,0 +1,46 @@
+# syntax=docker/dockerfile:1
+
+# ── Stage 1: Builder ──────────────────────────────────────────────────────────
+# Install MLflow and its dependencies into an isolated directory (/app/deps).
+# Keeping the install separate means pip's cache and build tools stay in this
+# stage and are discarded — they never make it into the final image.
+FROM python:3.12-slim AS builder
+
+WORKDIR /app
+
+RUN pip install --no-cache-dir --target=/app/deps mlflow==3.11.1
+
+# ── Stage 2: Production ───────────────────────────────────────────────────────
+# Lean final image — only the installed packages are copied over from the
+# builder stage. No pip, no build cache, no unnecessary tooling.
+FROM python:3.12-slim AS production
+
+WORKDIR /app
+
+# Copy only the installed packages from the builder stage.
+COPY --from=builder /app/deps /usr/local/lib/python3.12/site-packages/
+
+# Create directories for MLflow's two storage concerns:
+#   /mlflow/backend  — SQLite database that stores experiment/run metadata
+#                      and the model registry (versions, stages)
+#   /mlflow/artifacts — raw files logged per run (model .pkl, encoders, plots)
+RUN mkdir -p /mlflow/artifacts /mlflow/backend
+
+# Prevent Python from buffering stdout/stderr (ensures logs appear immediately)
+# and from writing .pyc bytecode files into the container.
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+EXPOSE 5000
+
+# Start the MLflow tracking server via python -m (consistent with backend/frontend
+# Dockerfiles — avoids relying on a CLI executable in $PATH):
+#   --backend-store-uri  — SQLite file for metadata + model registry
+#   --default-artifact-root — where run artifacts (files) are stored
+# The /mlflow directory is bind-mounted to ./mlruns in docker-compose.yml
+# so data persists across container restarts.
+ENTRYPOINT ["python", "-m", "mlflow", "server"]
+CMD ["--host", "0.0.0.0", "--port", "5000", \
+     "--backend-store-uri", "sqlite:////mlflow/backend/mlflow.db", \
+     "--artifacts-destination", "/mlflow/artifacts", \
+     "--serve-artifacts"]
