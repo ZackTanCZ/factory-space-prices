@@ -46,9 +46,14 @@ class InferenceOrchestrator:
         if not (c.area_sqft.min < area_sqft <= c.area_sqft.max):
             raise ValueError(f"area_sqft must be between {c.area_sqft.min} and {c.area_sqft.max}")
 
-        valid_durations = list(c.lease_duration.valid_values)
-        if lease_duration not in valid_durations:
-            raise ValueError(f"lease_duration must be one of {valid_durations}")
+        # valid_durations = list(c.lease_duration.valid_values)
+        # if lease_duration not in valid_durations:
+        #     raise ValueError(f"lease_duration must be one of {valid_durations}")
+        if not (c.lease_duration.min <= lease_duration <= c.lease_duration.max):
+            raise ValueError(
+                f"lease_duration must be between "
+                f"{c.lease_duration.min} and {c.lease_duration.max}"
+            )
 
         if not (c.remaining_lease_years.min <= remaining_lease_years <= c.remaining_lease_years.max):
             raise ValueError(
