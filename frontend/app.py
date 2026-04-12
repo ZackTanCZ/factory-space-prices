@@ -63,10 +63,12 @@ with st.form("prediction_form"):
             value=45.0,
             step=1.0,
         )
-        lease_duration = st.selectbox(
+        lease_duration = st.number_input(
             "Total Lease Duration (years)",
-            options=constraints["lease_duration"]["valid_values"],
-            index=1,
+            min_value=float(constraints["lease_duration"]["min"]),
+            max_value=float(constraints["lease_duration"]["max"]),
+            value=60.0,
+            step=1.0,
         )
         dist_to_mrt_m = st.number_input(
             "Distance to Nearest MRT (metres)",

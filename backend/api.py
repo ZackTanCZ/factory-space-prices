@@ -74,4 +74,4 @@ def predict_price(
         raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
         logger.error("Prediction failed: %s", e)
-        raise HTTPException(status_code=500, detail="Prediction failed. Please check your inputs.")
+        raise HTTPException(status_code=500, detail=f"Prediction failed. Please check your inputs - {str(e)}")

@@ -19,6 +19,7 @@ services:
       - ./src:/app/src
       - ./backend:/app/backend
       - ./models:/app/models
+    profiles: ["serving"]
 
   mlflow:
     build:
@@ -43,4 +44,5 @@ services:
         condition: service_healthy
     volumes:
       - ./frontend:/app/frontend
+    profiles: ["serving"]
 
