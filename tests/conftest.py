@@ -114,7 +114,7 @@ def dummy_cfg():
             "area_sqft": {"min": 100, "max": 25000},
             "remaining_lease_years": {"min": 1, "max": 99},
             "dist_to_mrt_m": {"min": 0, "max": 10000},
-            "lease_duration": {"valid_values": [30, 60, 99]},
+            "lease_duration": {"min": 1, "max": 99},
         },
         "feature_values": {
             "planning_areas": PLANNING_AREAS,
