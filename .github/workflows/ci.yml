@@ -72,7 +72,7 @@ jobs:
           push: false
 
       - name: Start backend container
-        run: docker run -d --name backend-test -p 8000:8000 -e SKIP_MODEL_LOAD=true fyp-backend:ci
+        run: docker run -d --name backend-test -p 8000:8000 fyp-backend:ci
 
       - name: Check liveness
         run: |
@@ -85,6 +85,20 @@ jobs:
             sleep 3
           done
           echo "Backend failed liveness check"
+          docker logs backend-test
+          exit 1
+
+      - name: Check Predictive Model readiness
+        run: |
+          for i in $(seq 1 5); do
+            if curl -sf http://localhost:8000/health/ready; then
+              echo "Predictive model is ready for inference"
+              exit 0
+            fi
+            echo "Waiting... ($i/5)"
+            sleep 6
+          done
+          echo "Backend failed readiness check"
           docker logs backend-test
           exit 1
 
