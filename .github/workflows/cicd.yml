@@ -1,0 +1,179 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: Lint - Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install ruff
+        run: pip install ruff==0.11.2
+
+      - name: Run ruff
+        run: ruff check .
+
+  test:
+    name: Unit Testing
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -e ".[backend]" pytest==8.3.5
+
+      - name: Run tests
+        run: python -m pytest tests/ -v
+
+  build:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.backend
+          tags: fyp-backend:ci
+          load: true
+          push: false
+
+      - name: Build frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.frontend
+          push: false
+
+      - name: Start backend container
+        run: docker run -d --name backend-test -p 8000:8000 fyp-backend:ci
+
+      - name: Check liveness
+        run: |
+          for i in $(seq 1 5); do
+            if curl -sf http://localhost:8000/health/live; then
+              echo "Backend is live"
+              exit 0
+            fi
+            echo "Waiting... ($i/5)"
+            sleep 3
+          done
+          echo "Backend failed liveness check"
+          docker logs backend-test
+          exit 1
+
+      - name: Check Predictive Model readiness
+        run: |
+          for i in $(seq 1 5); do
+            if curl -sf http://localhost:8000/health/ready; then
+              echo "Predictive model is ready for inference"
+              exit 0
+            fi
+            echo "Waiting... ($i/5)"
+            sleep 6
+          done
+          echo "Backend failed readiness check"
+          docker logs backend-test
+          exit 1
+
+      - name: Stop backend container
+        if: always()
+        run: docker stop backend-test && docker rm backend-test
+
+  build-push-backend:
+    name: Build & Push Backend Image
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with: 
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx 
+        uses: docker/setup-buildx-action@v3
+
+      - name: Lowercase repository_owner
+        run: echo "REPO_OWNER=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      - name: Build & push backend image 
+        uses: docker/build-push-action@v6      
+        with: 
+          context: .
+          file: docker/Dockerfile.backend
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' }}
+          tags: |
+            ghcr.io/${{ env.REPO_OWNER }}/fyp-backend:latest
+            ghcr.io/${{ env.REPO_OWNER }}/fyp-backend:${{ github.sha }}
+
+      - name: Trigger Auto Deploy Backend To Render
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'      
+        run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_BACKEND }}
+  
+  build-push-frontend:
+    name: Build & Push Frontend Image
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with: 
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}   
+
+      - name: Set up Docker Buildx 
+        uses: docker/setup-buildx-action@v3
+
+      - name: Lowercase repository_owner
+        run: echo "REPO_OWNER=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      - name: Build & push frontend image 
+        uses: docker/build-push-action@v6      
+        with: 
+          context: .
+          file: docker/Dockerfile.frontend
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' }}
+          tags: |
+            ghcr.io/${{ env.REPO_OWNER }}/fyp-frontend:latest     
+            ghcr.io/${{ env.REPO_OWNER }}/fyp-frontend:${{ github.sha }}
+
+      - name: Trigger Auto Deploy Frontend To Render
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+        run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_FRONTEND }}   
+  
