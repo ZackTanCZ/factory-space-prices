@@ -41,6 +41,10 @@ jobs:
           tags: |
             ghcr.io/${{ env.REPO_OWNER }}/fyp-backend:latest
             ghcr.io/${{ env.REPO_OWNER }}/fyp-backend:${{ github.sha }}
+
+      - name: Trigger Auto Deploy Backend To Render
+        if: github.event_name != 'pull_request'      
+        run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_BACKEND }}
   
   build-push-frontend:
     name: Build & Push Frontend Image
@@ -71,3 +75,7 @@ jobs:
           tags: |
             ghcr.io/${{ env.REPO_OWNER }}/fyp-frontend:latest     
             ghcr.io/${{ env.REPO_OWNER }}/fyp-frontend:${{ github.sha }}
+
+      - name: Trigger Auto Deploy Frontend To Render
+        if: github.event_name != 'pull_request'
+        run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_FRONTEND }}            
