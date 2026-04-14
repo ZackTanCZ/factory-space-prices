@@ -16,25 +16,9 @@ import logging
 
 import numpy as np
 import pandas as pd
+from sklearn.preprocessing import OneHotEncoder
 
 logger = logging.getLogger(__name__)
-
-# # Expected feature columns in the exact order the model was trained on
-# FEATURE_COLS = [
-#     "Log_Area",
-#     "Remaining_Lease_Years",
-#     "Lease_Remaining_Ratio",
-#     "dist_to_mrt_m",
-#     "Planning_Area_Encoded",
-#     "Region_East Region",
-#     "Region_North Region",
-#     "Region_North-East Region",
-#     "Region_West Region",
-#     "Floor Level_Non-First Floor",
-#     "Floor Level_Unknown",
-#     "Type of Sale_Resale",
-# ]
-
 
 def preprocess(
     area_sqft: float,
@@ -46,7 +30,7 @@ def preprocess(
     region: str,
     dist_to_mrt_m: float,
     target_encoder: dict,
-    ohe,
+    ohe: OneHotEncoder,
     feature_cols: list
 ) -> pd.DataFrame:
     # 1. Log-transform area

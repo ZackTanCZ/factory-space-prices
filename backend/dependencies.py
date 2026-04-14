@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 PROJECT_ROOT = Path(os.environ.get("PROJECT_ROOT", Path(__file__).parent.parent))
 CONFIG_DIR = str(PROJECT_ROOT / "config")
 
-_orchestrator: InferenceOrchestrator = None
+_orchestrator: InferenceOrchestrator | None = None
 
 
 def get_orchestrator() -> InferenceOrchestrator:
