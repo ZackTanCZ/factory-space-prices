@@ -133,13 +133,13 @@ jobs:
         with: 
           context: .
           file: docker/Dockerfile.backend
-          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' }}
+          push: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' }}
           tags: |
             ghcr.io/${{ env.REPO_OWNER }}/fyp-backend:latest
             ghcr.io/${{ env.REPO_OWNER }}/fyp-backend:${{ github.sha }}
 
       - name: Trigger Auto Deploy Backend To Render
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'      
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'      
         run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_BACKEND }}
   
   build-push-frontend:
@@ -168,12 +168,12 @@ jobs:
         with: 
           context: .
           file: docker/Dockerfile.frontend
-          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' }}
+          push: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' }}
           tags: |
             ghcr.io/${{ env.REPO_OWNER }}/fyp-frontend:latest     
             ghcr.io/${{ env.REPO_OWNER }}/fyp-frontend:${{ github.sha }}
 
       - name: Trigger Auto Deploy Frontend To Render
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
         run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_FRONTEND }}   
   
