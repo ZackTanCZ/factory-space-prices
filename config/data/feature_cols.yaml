@@ -1,5 +1,6 @@
 # @package feature_cols
 
+# These are the list of feature which will train our XGBoost Model
 feature_cols:
   - Log_Area
   - Remaining_Lease_Years

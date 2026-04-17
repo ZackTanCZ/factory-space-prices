@@ -6,6 +6,10 @@ area_sqft:
   min: 100
   max: 25000
 
+# Frontend validation
+lease_start_years:
+  min: 1925
+
 remaining_lease_years:
   min: 1
   max: 99
@@ -18,4 +22,3 @@ dist_to_mrt_m:
 lease_duration:
   min: 1
   max: 99
-  # valid_values: [30, 60, 99]
