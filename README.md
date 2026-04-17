@@ -90,12 +90,23 @@ docker compose --profile serving up
 
 ## Training a New Model
 
-### 1. Start the MLflow tracking server
+### 1. Start the MLflow tracking server - Docker Compose
 ```bash
-# Starts MLflow in the background (detached mode)
+# Starts MLflow in the background (detached mode) with docker compose
 docker compose --profile training up -d
 ```
-MLflow UI at `http://localhost:5000`
+### 1a. Start the MLflow tracking server - Docker build & Docker run
+```bash
+# Build the image
+docker build -f docker/Dockerfile.mlflow -t fyp-mlflow .
+
+# Spin up a container of the image
+docker run -p 5000:5000 -v "$(pwd)/mlruns:/mlflow" fyp-mlflow
+```
+> The `-v` command binds a persistent storage to the container.  
+> Experiment and artifacts persist across container restart
+
+> MLflow UI at `http://localhost:5000`
 
 ### 2. Run the training pipeline
 ```bash

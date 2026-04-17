@@ -9,9 +9,11 @@ Usage:
     python -m src.pipeline.training.export_model
 """
 
+import json
 import logging
 import os
 import shutil
+from datetime import datetime
 from pathlib import Path
 
 import mlflow
@@ -74,7 +76,22 @@ def main():
         shutil.copy2(src_file, dest_file)
         logger.info("Exported: %s → %s", src_file.name, dest_file)
 
+    # Write traceability record so artifacts can always be traced back to their MLflow run.
+    # run_id is the shared key — model_source and encoders were both produced by the same run.
+    champion_info = {
+        "model_name": settings.MLFLOW_MODEL_NAME,
+        "alias": settings.MLFLOW_CHAMPION_ALIAS,
+        "version": version.version,
+        "run_id": version.run_id,
+        "model_source": version.source,
+        "encoders": [f.name for f in Path(encoders_dir).iterdir()],
+        "exported_at": datetime.now().isoformat(timespec="seconds"),
+    }
+    info_path = dest_dir / "champion_info.json"
+    info_path.write_text(json.dumps(champion_info, indent=2))
+
     logger.info("Export complete. Champion artifacts saved to %s", dest_dir)
+    logger.info("Champion info:\n%s", json.dumps(champion_info, indent=2))
 
 
 if __name__ == "__main__":

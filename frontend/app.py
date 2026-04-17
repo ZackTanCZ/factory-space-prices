@@ -8,6 +8,7 @@ Requires backend to be running:
     uvicorn backend.api:app --reload --port 8000
 """
 import os
+from datetime import date
 
 import requests
 import streamlit as st
@@ -56,12 +57,12 @@ with st.form("prediction_form"):
             value=1500.0,
             step=50.0,
         )
-        remaining_lease_years = st.number_input(
-            "Remaining Lease (years)",
-            min_value=float(constraints["remaining_lease_years"]["min"]),
-            max_value=float(constraints["remaining_lease_years"]["max"]),
-            value=45.0,
-            step=1.0,
+        lease_start_year = st.number_input(
+            "Lease Start Year",
+            min_value=int(constraints["lease_start_years"]["min"]),
+            max_value=date.today().year,
+            value=2000,
+            step=1,
         )
         lease_duration = st.number_input(
             "Total Lease Duration (years)",
@@ -88,7 +89,15 @@ with st.form("prediction_form"):
 
 # --- Prediction ---
 if submitted:
-    if remaining_lease_years > float(lease_duration):
+    expiry_year = int(lease_start_year) + int(lease_duration)
+    remaining_lease_years = expiry_year - date.today().year
+
+    if remaining_lease_years <= 0:
+        st.error(
+            f"Lease has already expired "
+            f"({int(lease_start_year)} + {int(lease_duration)} years = expired in {expiry_year})."
+        )
+    elif remaining_lease_years > float(lease_duration):
         st.error("Remaining lease years cannot exceed total lease duration.")
     else:
         payload = {

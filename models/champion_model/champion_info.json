@@ -1,0 +1,12 @@
+{
+  "model_name": "factory-price-prediction",
+  "alias": "champion",
+  "version": "3",
+  "run_id": "3f6ec124464648dca0fbcc3fd4817c3c",
+  "model_source": "models:/m-b6a1a2d62fde46249bbd71c5ef31e8f7",
+  "encoders": [
+    "onehot_encoder.pkl",
+    "target_encoder.pkl"
+  ],
+  "exported_at": "2026-04-17T12:24:08"
+}
