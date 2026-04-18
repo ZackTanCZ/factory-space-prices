@@ -4,3 +4,8 @@ defaults:
   - data/feature_values       # distinct values for each categorical feature
   - data/feature_cols         # Order of features in the final dataframe 
   - api/settings              # model paths
+
+hydra:
+  output_subdir: null                      # Don't create .hydra/ subfolder
+  run:
+    dir: .                                 # Stay in current directory

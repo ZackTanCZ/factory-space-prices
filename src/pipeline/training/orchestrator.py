@@ -131,7 +131,7 @@ class TrainingPipeline:
 
         logger.info("Config validation passed.")
 
-    def run(self) -> None:
+    def run(self) -> float:
         self._validate_config()
         self.load_data()
         self.encode()
@@ -158,3 +158,5 @@ class TrainingPipeline:
             run_id = mlflow.active_run().info.run_id
             mlflow.register_model(model_uri=f"runs:/{run_id}/model", name=settings.MLFLOW_MODEL_NAME)
             logger.info("Model registered as '%s' in MLflow registry.", settings.MLFLOW_MODEL_NAME)
+
+        return self.metrics["rmse"]

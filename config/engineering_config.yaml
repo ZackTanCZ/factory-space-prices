@@ -1,0 +1,8 @@
+defaults:
+  - _self_
+  - engineering/data
+
+hydra:
+  output_subdir: null                      # Don't create .hydra/ subfolder
+  run:
+    dir: .                                 # Stay in current directory

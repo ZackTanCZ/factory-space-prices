@@ -4,3 +4,8 @@ defaults:
   - train/model
   - api/settings
   - data/feature_cols
+
+hydra:
+  output_subdir: null                      # Don't create .hydra/ subfolder
+  run:
+    dir: .                                 # Stay in current directory
