@@ -92,7 +92,6 @@ docker compose --profile serving up
 
 ### 1. Start the MLflow tracking server - Docker Compose
 ```bash
-# Starts MLflow in the background (detached mode) with docker compose
 docker compose --profile training up -d
 ```
 ### 1a. Start the MLflow tracking server - Docker build & Docker run
@@ -110,25 +109,24 @@ docker run -p 5000:5000 -v "$(pwd)/mlruns:/mlflow" fyp-mlflow
 
 ### 2. (Optional) Run hyperparameter optimisation
 ```bash
-# Runs 50 Optuna trials via Hydra Sweeper — each trial uses k-fold CV on the
-# training set and logs params + cv_rmse to MLflow. Test set is never touched.
+# 50 Optuna trials — each trial runs k-fold CV on train set only, test set never touched
 python -m src.pipeline.training.hpo --multirun
 ```
-- Compare trials in the MLflow UI (`http://localhost:5000`) — sort by `cv_rmse`
-- Copy the best hyperparameters into `config/train/model.yaml`
 - Search space is configured in `config/hpo_config.yaml`
+- Results are written to `logs/optimization_results.yaml` — review best params there
+- If the best params look promising, manually update `config/train/model.yaml` before running step 3
+- **Note:** HPO optimises CV RMSE on the train set. Always compare test RMSE (from step 3) against the baseline before promoting — HPO does not guarantee a better test score
 
 ### 3. Run the training pipeline
 ```bash
-# Trains the model with current config/train/model.yaml hyperparameters,
-# evaluates on the held-out test set, logs params/metrics/artifacts to MLflow
+# Trains on full train set, evaluates on held-out test set, logs to MLflow
 python -m src.pipeline.training.main
 ```
 
 ### 4. Promote the champion model
 - Open the MLflow UI at `http://localhost:5000`
-- Compare runs and find the best performing model
-- Assign the `champion` alias to that model version in the registry
+- Compare runs by `rmse` (test set) — lower is better
+- Assign the `champion` alias to the best model version in the registry
 
 ### 5. Export champion artifacts
 ```bash

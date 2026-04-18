@@ -8,8 +8,12 @@ defaults:
 hydra:
   output_subdir: null                    # Don't create .hydra/ subfolder
   sweep:
-    dir: .                               # Stay in current directory   
+    dir: logs                            # Write sweep outputs to logs/
     subdir: .
+  job_logging:
+    handlers:
+      file:
+        filename: logs/${hydra.job.name}.log
   sweeper:
     sampler:
       _target_: optuna.samplers.TPESampler

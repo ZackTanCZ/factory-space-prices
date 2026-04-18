@@ -62,8 +62,8 @@ class TrainingPipeline:
         self.X_test = apply_ohe(self.X_test, self.ohe, cat_cols, target_encode_col)
 
         ohe_cols = [c for c in self.X_train.columns if any(c.startswith(cat) for cat in cat_cols)]
-        logger.info("Target encoded: %s → %s_Encoded", target_encode_col, target_encode_col.replace(" ", "_"))
-        logger.info("One-hot encoded: %s → %s", list(cat_cols), ohe_cols)
+        logger.info("Target encoded: %s -> %s_Encoded", target_encode_col, target_encode_col.replace(" ", "_"))
+        logger.info("One-hot encoded: %s -> %s", list(cat_cols), ohe_cols)
 
         # Reorder columns to match feature_cols.yaml — the YAML is the source of truth
         # for column order. Both training and inference conform to it so they stay in sync.
@@ -140,7 +140,7 @@ class TrainingPipeline:
         mlflow.set_tracking_uri(settings.MLFLOW_TRACKING_URI)
         mlflow.set_experiment(settings.MLFLOW_EXPERIMENT_NAME)
 
-        with mlflow.start_run():
+        with mlflow.start_run(run_name="CHAMPION_MODEL_RUN"):
             self.train()
             self.evaluate()
 

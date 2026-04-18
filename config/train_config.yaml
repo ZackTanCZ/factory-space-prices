@@ -9,3 +9,7 @@ hydra:
   output_subdir: null                      # Don't create .hydra/ subfolder
   run:
     dir: .                                 # Stay in current directory
+  job_logging:
+    handlers:
+      file:
+        filename: logs/${hydra.job.name}.log

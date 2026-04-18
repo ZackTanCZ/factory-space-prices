@@ -22,13 +22,13 @@ from src.core.settings import get_settings
 from src.pipeline.training.orchestrator import TrainingPipeline
 from src.pipeline.training.steps import cross_val_rmse
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s — %(levelname)s — %(message)s")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 PROJECT_ROOT = Path(os.environ.get("PROJECT_ROOT", Path(__file__).parent.parent.parent.parent))
 
 
-@hydra.main(config_path="../../../../config", config_name="hpo_config", version_base=None)
+@hydra.main(config_path="../../../config", config_name="hpo_config", version_base=None)
 def main(cfg: DictConfig) -> float:
     settings = get_settings()
     mlflow.set_tracking_uri(settings.MLFLOW_TRACKING_URI)
@@ -59,7 +59,7 @@ def main(cfg: DictConfig) -> float:
     with mlflow.start_run():
         mlflow.log_params(params)
         mlflow.log_metric("cv_rmse", cv_rmse)
-        logger.info("Trial complete — cv_rmse: %.4f", cv_rmse)
+        logger.info("Trial complete - cv_rmse: %.4f", cv_rmse)
 
     return cv_rmse
 
