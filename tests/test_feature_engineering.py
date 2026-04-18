@@ -1,6 +1,5 @@
 """Unit tests for src/pipeline/engineering/steps.py — pure functions only."""
 
-import math
 
 import numpy as np
 import pandas as pd
@@ -66,7 +65,8 @@ def sample_mrt_df():
 def test_log_area_computed(sample_df):
     result = apply_feature_transforms(sample_df, TARGET_COL, DROP_COLS)
     expected = np.log(sample_df["Area (sqft)"])
-    pd.testing.assert_series_equal(result["Log_Area"].reset_index(drop=True), expected.reset_index(drop=True), check_names=False)
+    pd.testing.assert_series_equal(result["Log_Area"].reset_index(drop=True),
+                                   expected.reset_index(drop=True), check_names=False)
 
 
 def test_lease_remaining_ratio_computed(sample_df):
@@ -198,7 +198,8 @@ def test_output_columns(sample_mrt_df):
         "longitude": [103.80],
     })
     result = compute_mrt_distances(geo_df, sample_mrt_df)
-    assert set(result.columns) == {"search_key", "Project Name", "latitude", "longitude", "dist_to_mrt_m", "nearest_mrt"}
+    assert set(result.columns) == {"search_key", "Project Name", "latitude", "longitude",
+                                   "dist_to_mrt_m", "nearest_mrt"}
 
 
 def test_rows_with_missing_coords_excluded(sample_mrt_df):
