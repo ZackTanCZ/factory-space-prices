@@ -6,6 +6,7 @@ Run with:
 """
 
 import logging
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, HTTPException
@@ -37,6 +38,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.get("/version")
+def version():
+    """Return the git SHA baked into the image at build time."""
+    return {"git_sha": os.environ.get("GIT_SHA", "unknown")}
 
 
 @app.get("/health/live")

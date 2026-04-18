@@ -128,12 +128,13 @@ jobs:
       - name: Lowercase repository_owner
         run: echo "REPO_OWNER=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
-      - name: Build & push backend image 
-        uses: docker/build-push-action@v6      
-        with: 
+      - name: Build & push backend image
+        uses: docker/build-push-action@v6
+        with:
           context: .
           file: docker/Dockerfile.backend
           push: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' }}
+          build-args: GIT_SHA=${{ github.sha }}
           tags: |
             ghcr.io/${{ env.REPO_OWNER }}/fyp-backend:latest
             ghcr.io/${{ env.REPO_OWNER }}/fyp-backend:${{ github.sha }}
