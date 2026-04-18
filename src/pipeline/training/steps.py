@@ -7,10 +7,11 @@ and return transformed data or fitted encoders. No side effects.
 
 import numpy as np
 import pandas as pd
+from hydra.utils import instantiate
+from omegaconf import DictConfig
 from sklearn.metrics import mean_squared_error, r2_score
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import KFold, train_test_split
 from sklearn.preprocessing import OneHotEncoder
-from xgboost import XGBRegressor
 
 
 def split_data(
@@ -63,7 +64,27 @@ def apply_ohe(X: pd.DataFrame, ohe: OneHotEncoder, cat_cols: list[str], target_e
     return X.drop(columns=[target_encode_col] + cat_cols).join(ohe_df)
 
 
-def evaluate(model: XGBRegressor, X_test: pd.DataFrame, y_test: pd.Series) -> dict:
+def cross_val_rmse(
+    model_cfg: DictConfig,
+    X_train: pd.DataFrame,
+    y_train: pd.Series,
+    n_splits: int = 5,
+    random_state: int = 42,
+) -> float:
+    """K-fold CV on training set only. Returns mean RMSE across folds."""
+    kf = KFold(n_splits=n_splits, shuffle=True, random_state=random_state)
+    rmses = []
+    for train_idx, val_idx in kf.split(X_train):
+        X_tr, X_val = X_train.iloc[train_idx], X_train.iloc[val_idx]
+        y_tr, y_val = y_train.iloc[train_idx], y_train.iloc[val_idx]
+        model = instantiate(model_cfg)
+        model.fit(X_tr, y_tr)
+        preds = model.predict(X_val)
+        rmses.append(float(np.sqrt(mean_squared_error(y_val, preds))))
+    return float(np.mean(rmses))
+
+
+def evaluate(model, X_test: pd.DataFrame, y_test: pd.Series) -> dict:
     """Evaluate model on test set. Returns RMSE, MAE, R²."""
     y_pred = model.predict(X_test)
     return {

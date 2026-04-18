@@ -1,0 +1,31 @@
+defaults:
+  - _self_
+  - train/data
+  - train/model
+  - data/feature_cols
+  - override hydra/sweeper: optuna
+
+hydra:
+  output_subdir: null                    # Don't create .hydra/ subfolder
+  sweep:
+    dir: logs                            # Write sweep outputs to logs/
+    subdir: .
+  job_logging:
+    handlers:
+      file:
+        filename: logs/${hydra.job.name}.log
+  sweeper:
+    sampler:
+      _target_: optuna.samplers.TPESampler
+      seed: 42
+    direction: minimize
+    n_trials: 50
+    params:
+      train_model.n_estimators: range(100, 500)
+      train_model.max_depth: range(3, 10)
+      train_model.learning_rate: interval(0.01, 0.3)
+      train_model.subsample: interval(0.5, 1.0)
+      train_model.colsample_bytree: interval(0.5, 1.0)
+      train_model.min_child_weight: range(1, 10)
+      train_model.reg_alpha: interval(0.0, 1.0)
+      train_model.reg_lambda: interval(0.0, 2.0)

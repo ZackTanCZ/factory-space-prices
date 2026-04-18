@@ -73,7 +73,7 @@ class FeatureEngineeringPipeline:
             logger.info("Loaded geocode cache: %d buildings.", len(cache))
         else:
             cache = pd.DataFrame(columns=["search_key", "Project Name", "latitude", "longitude"])
-            logger.info("No geocode cache found — will geocode all buildings.")
+            logger.info("No geocode cache found - will geocode all buildings.")
 
         geo_df = geocode_new_buildings(self.df, cache)
 
@@ -110,7 +110,7 @@ class FeatureEngineeringPipeline:
         logger.info("Geocode cache saved: %s", self.geocode_cache_path)
 
         logger.info(
-            "Distance stats (m) — min: %.0f | median: %.0f | max: %.0f",
+            "Distance stats (m) - min: %.0f | median: %.0f | max: %.0f",
             geo_df["dist_to_mrt_m"].min(),
             geo_df["dist_to_mrt_m"].median(),
             geo_df["dist_to_mrt_m"].max(),
@@ -126,11 +126,11 @@ class FeatureEngineeringPipeline:
         missing = self.df["dist_to_mrt_m"].isna().sum()
         if missing > 0:
             raise ValueError(
-                f"{missing} rows have no dist_to_mrt_m after merge — check geocode cache."
+                f"{missing} rows have no dist_to_mrt_m after merge - check geocode cache."
             )
 
         logger.info(
-            "dist_to_mrt_m merged — r with target: %.3f",
+            "dist_to_mrt_m merged - r with target: %.3f",
             self.df["dist_to_mrt_m"].corr(self.df[self.cfg.feat_engr.target_col]),
         )
 

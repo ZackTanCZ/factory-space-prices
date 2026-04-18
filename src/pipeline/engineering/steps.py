@@ -27,20 +27,20 @@ def apply_feature_transforms(df: pd.DataFrame, target_col: str, drop_cols: list[
 
     df["Log_Area"] = np.log(df["Area (sqft)"])
     logger.info(
-        "Log_Area computed — skewness: %.3f → %.3f",
+        "Log_Area computed - skewness: %.3f -> %.3f",
         df["Area (sqft)"].skew(),
         df["Log_Area"].skew(),
     )
 
     df["Lease_Remaining_Ratio"] = df["Remaining_Lease_Years"] / df["Lease_Duration"]
     logger.info(
-        "Lease_Remaining_Ratio computed — r with target: %.3f",
+        "Lease_Remaining_Ratio computed - r with target: %.3f",
         df["Lease_Remaining_Ratio"].corr(df[target_col]),
     )
 
     df["Log_Unit_Price"] = np.log(df[target_col])
     logger.info(
-        "Log_Unit_Price computed — skewness: %.3f → %.3f",
+        "Log_Unit_Price computed - skewness: %.3f -> %.3f",
         df[target_col].skew(),
         df["Log_Unit_Price"].skew(),
     )
@@ -85,7 +85,7 @@ def geocode_new_buildings(
     new_addresses = unique_addresses[~unique_addresses["search_key"].isin(cached_keys)]
 
     if new_addresses.empty:
-        logger.info("All %d buildings already cached — skipping API calls.", len(unique_addresses))
+        logger.info("All %d buildings already cached - skipping API calls.", len(unique_addresses))
         return cache
 
     logger.info(

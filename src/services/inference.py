@@ -41,7 +41,7 @@ def preprocess(
 
     # 3. Target-encode planning area (fallback to global mean for unseen areas)
     if planning_area not in target_encoder["map"]:
-        logger.warning("Unknown planning area '%s' — falling back to global mean", planning_area)
+        logger.warning("Unknown planning area '%s' - falling back to global mean", planning_area)
     planning_area_encoded = float(
         target_encoder["map"].get(planning_area, target_encoder["global_mean"])
     )

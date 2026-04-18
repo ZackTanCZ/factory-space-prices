@@ -62,8 +62,8 @@ class TrainingPipeline:
         self.X_test = apply_ohe(self.X_test, self.ohe, cat_cols, target_encode_col)
 
         ohe_cols = [c for c in self.X_train.columns if any(c.startswith(cat) for cat in cat_cols)]
-        logger.info("Target encoded: %s → %s_Encoded", target_encode_col, target_encode_col.replace(" ", "_"))
-        logger.info("One-hot encoded: %s → %s", list(cat_cols), ohe_cols)
+        logger.info("Target encoded: %s -> %s_Encoded", target_encode_col, target_encode_col.replace(" ", "_"))
+        logger.info("One-hot encoded: %s -> %s", list(cat_cols), ohe_cols)
 
         # Reorder columns to match feature_cols.yaml — the YAML is the source of truth
         # for column order. Both training and inference conform to it so they stay in sync.
@@ -131,7 +131,7 @@ class TrainingPipeline:
 
         logger.info("Config validation passed.")
 
-    def run(self) -> None:
+    def run(self) -> float:
         self._validate_config()
         self.load_data()
         self.encode()
@@ -140,7 +140,7 @@ class TrainingPipeline:
         mlflow.set_tracking_uri(settings.MLFLOW_TRACKING_URI)
         mlflow.set_experiment(settings.MLFLOW_EXPERIMENT_NAME)
 
-        with mlflow.start_run():
+        with mlflow.start_run(run_name="CHAMPION_MODEL_RUN"):
             self.train()
             self.evaluate()
 
@@ -158,3 +158,5 @@ class TrainingPipeline:
             run_id = mlflow.active_run().info.run_id
             mlflow.register_model(model_uri=f"runs:/{run_id}/model", name=settings.MLFLOW_MODEL_NAME)
             logger.info("Model registered as '%s' in MLflow registry.", settings.MLFLOW_MODEL_NAME)
+
+        return self.metrics["rmse"]

@@ -16,12 +16,12 @@ from omegaconf import DictConfig
 
 from src.pipeline.engineering.orchestrator import FeatureEngineeringPipeline
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s — %(levelname)s — %(message)s")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 PROJECT_ROOT = Path(os.environ.get("PROJECT_ROOT", Path(__file__).parent.parent.parent.parent))
 
-@hydra.main(config_path="../../../../config", config_name="engineering_config", version_base=None)
+@hydra.main(config_path="../../../config", config_name="engineering_config", version_base=None)
 def main(cfg: DictConfig) -> None:
     logger.info("Starting feature engineering pipeline...")
 

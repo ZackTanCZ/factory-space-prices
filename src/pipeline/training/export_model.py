@@ -22,7 +22,7 @@ from mlflow.tracking import MlflowClient
 
 from src.core.settings import get_settings
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s — %(levelname)s — %(message)s")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 PROJECT_ROOT = Path(os.environ.get("PROJECT_ROOT", Path(__file__).parent.parent.parent.parent))
@@ -63,7 +63,7 @@ def main():
         tracking_uri=settings.MLFLOW_TRACKING_URI,
     )
     shutil.copy2(Path(model_dir) / "model.pkl", dest_dir / "model.pkl")
-    logger.info("Exported: model.pkl → %s", dest_dir)
+    logger.info("Exported: model.pkl -> %s", dest_dir)
 
     # Download encoder artifacts (target encoder + OHE)
     encoders_dir = mlflow.artifacts.download_artifacts(
@@ -74,7 +74,7 @@ def main():
     for src_file in Path(encoders_dir).iterdir():
         dest_file = dest_dir / src_file.name
         shutil.copy2(src_file, dest_file)
-        logger.info("Exported: %s → %s", src_file.name, dest_file)
+        logger.info("Exported: %s -> %s", src_file.name, dest_file)
 
     # Write traceability record so artifacts can always be traced back to their MLflow run.
     # run_id is the shared key — model_source and encoders were both produced by the same run.
