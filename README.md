@@ -108,24 +108,35 @@ docker run -p 5000:5000 -v "$(pwd)/mlruns:/mlflow" fyp-mlflow
 
 > MLflow UI at `http://localhost:5000`
 
-### 2. Run the training pipeline
+### 2. (Optional) Run hyperparameter optimisation
 ```bash
-# Trains the model, logs params/metrics/artifacts to MLflow
+# Runs 50 Optuna trials via Hydra Sweeper — each trial uses k-fold CV on the
+# training set and logs params + cv_rmse to MLflow. Test set is never touched.
+python -m src.pipeline.training.hpo --multirun
+```
+- Compare trials in the MLflow UI (`http://localhost:5000`) — sort by `cv_rmse`
+- Copy the best hyperparameters into `config/train/model.yaml`
+- Search space is configured in `config/hpo_config.yaml`
+
+### 3. Run the training pipeline
+```bash
+# Trains the model with current config/train/model.yaml hyperparameters,
+# evaluates on the held-out test set, logs params/metrics/artifacts to MLflow
 python -m src.pipeline.training.main
 ```
 
-### 3. Promote the champion model
+### 4. Promote the champion model
 - Open the MLflow UI at `http://localhost:5000`
 - Compare runs and find the best performing model
 - Assign the `champion` alias to that model version in the registry
 
-### 4. Export champion artifacts
+### 5. Export champion artifacts
 ```bash
 # Downloads champion artifacts from MLflow to models/champion_model/
 python -m src.pipeline.training.export_model
 ```
 
-### 5. Commit and deploy
+### 6. Commit and deploy
 ```bash
 git add models/champion_model/
 git commit -m "update champion model artifacts"
