@@ -1,0 +1,30 @@
+# @package feat_engr
+
+target_col: "Unit Price ($ psf)"
+
+# Columns that must be present in the input dataset for transforms and geocoding to run
+required_cols:
+  - "Area (sqft)"
+  - Remaining_Lease_Years
+  - Lease_Duration
+  - Project Name
+  - Street Name
+
+input_path: data/processed/factory_cleaned.csv
+output_path: data/processed/factory_engineered.csv
+mrt_path: data/raw/external/mrt_lrt.csv
+geocode_cache_path: data/processed/property_geocoded.csv
+
+# Columns dropped after feature transforms — not needed for training
+# Postal District/Sector: region-level codes, redundant with Planning Area/Region
+# Year/Month/Quarter: removed in ablation study (notebook 09a), negligible RMSE impact
+# Area (sqft): replaced by Log_Area
+# Lease_Duration: replaced by Lease_Remaining_Ratio
+drop_cols:
+  - "Area (sqft)"
+  - Lease_Duration
+  - Postal District
+  - Postal Sector
+  - Year
+  - Month
+  - Quarter
