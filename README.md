@@ -2,7 +2,7 @@
 
 ML project for predicting factory space prices ($ per square foot) in Singapore. Built with XGBoost, FastAPI, and Streamlit.
 
-**Live demo**: [Frontend](https://fyp-frontend-latest-3lz9.onrender.com)) | [Backend API](https://fyp-backend-latest-hsqo.onrender.com/docs)
+**Live demo**: [Frontend](https://fyp-frontend-latest-3lz9.onrender.com) | [Backend API](https://fyp-backend-latest-hsqo.onrender.com/docs)
 
 ---
 
