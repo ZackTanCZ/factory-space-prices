@@ -30,7 +30,6 @@ app = FastAPI(
     description="Predicts Singapore factory unit price ($ psf) using XGBoost.",
     version="1.0.0",
     lifespan=lifespan,
-    root_path="/api",
 )
 
 app.add_middleware(
