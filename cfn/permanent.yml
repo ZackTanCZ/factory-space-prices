@@ -110,6 +110,7 @@ Resources:
                 Resource: '*'
               - Effect: Allow
                 Action:
+                  - ecr:DescribeRepositories
                   - ecr:BatchCheckLayerAvailability
                   - ecr:PutImage
                   - ecr:InitiateLayerUpload
@@ -119,6 +120,18 @@ Resources:
                 Resource:
                   - !GetAtt BackendECRRepository.Arn
                   - !GetAtt FrontendECRRepository.Arn
+        - PolicyName: CloudFormationAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cloudformation:DescribeStacks
+                  - cloudformation:CreateChangeSet
+                  - cloudformation:ExecuteChangeSet
+                  - cloudformation:DescribeChangeSet
+                  - cloudformation:GetTemplateSummary
+                Resource: '*'
         - PolicyName: ECSDeployAccess
           PolicyDocument:
             Version: '2012-10-17'

@@ -107,41 +107,6 @@ jobs:
         if: always()
         run: docker stop backend-test && docker rm backend-test
 
-  # ---------------------------------------------------------------------------
-  # Deploy permanent stack — ECR repos + IAM roles.
-  # Runs on every push to main but CloudFormation only changes resources if the
-  # template actually changed (--no-fail-on-empty-changeset).
-  # ---------------------------------------------------------------------------
-  deploy-infra:
-    name: Deploy Permanent Stack
-    runs-on: ubuntu-latest
-    needs: build
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Deploy permanent stack
-        run: |
-          aws cloudformation deploy \
-            --template-file cfn/permanent.yml \
-            --stack-name fyp-permanent \
-            --capabilities CAPABILITY_NAMED_IAM \
-            --parameter-overrides \
-              ProjectName=fyp \
-              GitHubOrg=${{ github.repository_owner }} \
-              GitHubRepo=${{ github.event.repository.name }} \
-            --no-fail-on-empty-changeset \
-            --region ${{ secrets.AWS_REGION }}
 
   # ---------------------------------------------------------------------------
   # Build & push backend image to ECR, then deploy to ECS.
@@ -166,6 +131,13 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Verify ECR repository exists
+        run: |
+          aws ecr describe-repositories \
+            --repository-names fyp-backend \
+            --region ${{ secrets.AWS_REGION }} || \
+          (echo "ECR repository fyp-backend does not exist. Deploy cfn/permanent.yml first." && exit 1)
 
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v2
@@ -237,6 +209,13 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Verify ECR repository exists
+        run: |
+          aws ecr describe-repositories \
+            --repository-names fyp-frontend \
+            --region ${{ secrets.AWS_REGION }} || \
+          (echo "ECR repository fyp-frontend does not exist. Deploy cfn/permanent.yml first." && exit 1)
 
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v2
