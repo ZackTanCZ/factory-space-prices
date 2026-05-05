@@ -109,6 +109,42 @@ jobs:
 
 
   # ---------------------------------------------------------------------------
+  # Deploy permanent stack — ECR repos + IAM roles.
+  # Runs on every push to main but CloudFormation only changes resources if the
+  # template actually changed (--no-fail-on-empty-changeset).
+  # ---------------------------------------------------------------------------
+  deploy-infra:
+    name: Deploy Permanent Stack
+    runs-on: ubuntu-latest
+    needs: build
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy permanent stack
+        run: |
+          aws cloudformation deploy \
+            --template-file cfn/permanent.yml \
+            --stack-name fyp-permanent \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --parameter-overrides \
+              ProjectName=fyp \
+              GitHubOrg=${{ github.repository_owner }} \
+              GitHubRepo=${{ github.event.repository.name }} \
+            --no-fail-on-empty-changeset \
+            --region ${{ secrets.AWS_REGION }}
+
+  # ---------------------------------------------------------------------------
   # Build & push backend image to ECR, then deploy to ECS.
   # ECS deploy is skipped silently if the ephemeral stack is torn down
   # (default state between demos). Image is always pushed to ECR so that
