@@ -107,6 +107,7 @@ jobs:
         if: always()
         run: docker stop backend-test && docker rm backend-test
 
+
   # ---------------------------------------------------------------------------
   # Deploy permanent stack — ECR repos + IAM roles.
   # Runs on every push to main but CloudFormation only changes resources if the
@@ -166,6 +167,13 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Verify ECR repository exists
+        run: |
+          aws ecr describe-repositories \
+            --repository-names fyp-backend \
+            --region ${{ secrets.AWS_REGION }} || \
+          (echo "ECR repository fyp-backend does not exist. Deploy cfn/permanent.yml first." && exit 1)
 
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v2
@@ -237,6 +245,13 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Verify ECR repository exists
+        run: |
+          aws ecr describe-repositories \
+            --repository-names fyp-frontend \
+            --region ${{ secrets.AWS_REGION }} || \
+          (echo "ECR repository fyp-frontend does not exist. Deploy cfn/permanent.yml first." && exit 1)
 
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v2
