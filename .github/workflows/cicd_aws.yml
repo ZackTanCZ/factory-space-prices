@@ -187,6 +187,7 @@ jobs:
           context: .
           file: docker/Dockerfile.backend
           push: true
+          provenance: false
           platforms: linux/amd64
           build-args: GIT_SHA=${{ github.sha }}
           tags: ${{ secrets.ECR_BACKEND_URI }}:latest
@@ -264,6 +265,7 @@ jobs:
           context: .
           file: docker/Dockerfile.frontend
           push: true
+          provenance: false
           platforms: linux/amd64
           tags: ${{ secrets.ECR_FRONTEND_URI }}:latest
 
