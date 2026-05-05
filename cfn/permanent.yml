@@ -13,7 +13,7 @@ Parameters:
     Description: GitHub organisation or username (e.g. ZackTanCZ)
   GitHubRepo:
     Type: String
-    Description: GitHub repository name (e.g. fyp_redo_BMAD)
+    Description: GitHub repository name (e.g. factory-space-prices)
 
 Resources:
 
@@ -33,11 +33,11 @@ Resources:
             "rules": [
               {
                 "rulePriority": 1,
-                "description": "Keep last 10 images",
+                "description": "Keep last 3 images",
                 "selection": {
                   "tagStatus": "any",
                   "countType": "imageCountMoreThan",
-                  "countNumber": 10
+                  "countNumber": 3
                 },
                 "action": { "type": "expire" }
               }
@@ -56,11 +56,11 @@ Resources:
             "rules": [
               {
                 "rulePriority": 1,
-                "description": "Keep last 10 images",
+                "description": "Keep last 3 images",
                 "selection": {
                   "tagStatus": "any",
                   "countType": "imageCountMoreThan",
-                  "countNumber": 10
+                  "countNumber": 3
                 },
                 "action": { "type": "expire" }
               }
