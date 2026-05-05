@@ -188,9 +188,7 @@ jobs:
           file: docker/Dockerfile.backend
           push: true
           build-args: GIT_SHA=${{ github.sha }}
-          tags: |
-            ${{ secrets.ECR_BACKEND_URI }}:latest
-            ${{ secrets.ECR_BACKEND_URI }}:${{ github.sha }}
+          tags: ${{ secrets.ECR_BACKEND_URI }}:latest
 
       # ECS deploy steps — skipped when ephemeral stack is torn down.
       # The task definition download fails if the stack doesn't exist,
@@ -212,7 +210,7 @@ jobs:
         with:
           task-definition: task-def-backend.json
           container-name: backend
-          image: ${{ secrets.ECR_BACKEND_URI }}:${{ github.sha }}
+          image: ${{ secrets.ECR_BACKEND_URI }}:latest
 
       - name: Deploy to ECS and wait for stability
         if: steps.download-task-def-backend.outcome == 'success'
@@ -265,9 +263,7 @@ jobs:
           context: .
           file: docker/Dockerfile.frontend
           push: true
-          tags: |
-            ${{ secrets.ECR_FRONTEND_URI }}:latest
-            ${{ secrets.ECR_FRONTEND_URI }}:${{ github.sha }}
+          tags: ${{ secrets.ECR_FRONTEND_URI }}:latest
 
       - name: Download current task definition
         id: download-task-def-frontend
@@ -286,7 +282,7 @@ jobs:
         with:
           task-definition: task-def-frontend.json
           container-name: frontend
-          image: ${{ secrets.ECR_FRONTEND_URI }}:${{ github.sha }}
+          image: ${{ secrets.ECR_FRONTEND_URI }}:latest
 
       - name: Deploy to ECS and wait for stability
         if: steps.download-task-def-frontend.outcome == 'success'
