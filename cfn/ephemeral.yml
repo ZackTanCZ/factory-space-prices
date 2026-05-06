@@ -1,8 +1,8 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >
-  FYP ephemeral infrastructure — ALB, ECS cluster, ECS services, Cloud Map, security groups.
-  Deploy before a demo with `make demo-up`. Delete after with `make demo-down`.
-  Only incurs charges while deployed (~$0.23 per 2-hour demo session).
+  Creates a emphemeral CloudFormation stack consisting of the following:
+  Appliccation Load Balancer, ECS cluster, ECS services, Cloud Map and security groups.
+  Only incurs charges while deployed.
 
 Parameters:
   ProjectName:
@@ -24,11 +24,11 @@ Parameters:
 
   VpcId:
     Type: AWS::EC2::VPC::Id
-    Description: Default VPC ID (queried by Makefile)
+    Description: Default VPC ID
 
   SubnetIds:
     Type: List<AWS::EC2::Subnet::Id>
-    Description: Public subnet IDs in the default VPC (queried by Makefile)
+    Description: Public subnet IDs in the default VPC
 
 Resources:
 
