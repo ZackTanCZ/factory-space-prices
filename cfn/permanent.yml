@@ -1,7 +1,8 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >
-  FYP permanent infrastructure — ECR repositories and IAM roles.
-  Deploy once, never delete. GitHub Actions uses the outputs as repository secrets.
+  Creates a permanent CloudFormation stack for the following: 
+  ECR repositories and IAM roles.
+  GitHub Actions uses the outputs as repository secrets.
 
 Parameters:
   ProjectName:

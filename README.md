@@ -2,7 +2,7 @@
 
 ML project for predicting factory space prices ($ per square foot) in Singapore. Built with XGBoost, FastAPI, and Streamlit.
 
-**Live demo**: [Frontend](https://fyp-frontend-latest-3lz9.onrender.com) | [Backend API](https://fyp-backend-latest-hsqo.onrender.com/docs)
+**Live demo**: Run `bash scripts/demo-up.sh` to spin up the app on AWS — the URL is printed when ready. See [AWS_DEPLOY.md](AWS_DEPLOY.md) for setup instructions.
 
 ---
 
@@ -18,6 +18,8 @@ ML project for predicting factory space prices ($ per square foot) in Singapore.
 ├── backend/            # FastAPI server
 ├── frontend/           # Streamlit UI
 ├── config/             # Hydra config files (model, data, API settings)
+├── cfn/                # CloudFormation templates (permanent + ephemeral stacks)
+├── scripts/            # Bash scripts — start.sh, demo-up.sh, demo-down.sh
 ├── models/             # Champion model artifacts (.pkl)
 ├── docker/             # Dockerfiles for backend, frontend, MLflow
 ├── tests/              # Unit tests
@@ -140,7 +142,7 @@ git add models/champion_model/
 git commit -m "update champion model artifacts"
 git push
 ```
-The CI/CD pipeline automatically builds and pushes Docker images to GHCR, then triggers a Render redeploy.
+The CI/CD pipeline automatically builds and pushes Docker images to ECR. If the ephemeral stack is running, ECS is redeployed automatically. If not, the new image is picked up next time you run `bash scripts/demo-up.sh`.
 
 ---
 
@@ -157,8 +159,8 @@ python -m pytest tests/ -v  # Unit tests
 | Trigger | What runs |
 |---------|-----------|
 | Push to any branch | Lint → Unit tests → Docker build + health checks |
-| PR against `main` | Same as above + CD build validation (no push) |
-| Merge to `main` | Full CI + build & push images to GHCR + Render redeploy |
-| `workflow_dispatch` | Full CI + build & push images to GHCR + Render redeploy |
+| PR against `main` | CI only — no image push, no ECS deploy |
+| Merge to `main` | Full CI + deploy permanent stack + push images to ECR + deploy to ECS (if stack is up) |
+| `workflow_dispatch` | Same as merge to `main` |
 
 Branch protection on `main` requires all CI checks to pass before merge.
